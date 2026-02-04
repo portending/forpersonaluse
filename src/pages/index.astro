@@ -426,8 +426,9 @@
         .canvas-wrapper {
             position: relative;
             display: inline-block;
-            transform-origin: 0 0;
+            transform-origin: center center;
             flex-shrink: 0;
+            transition: transform 0.1s ease-out;
             /* Transparency grid pattern */
             background-image: 
                 linear-gradient(45deg, var(--transparency-dark) 25%, transparent 25%),
@@ -1594,31 +1595,47 @@
             canvasContainer.scrollTop = 0;
         });
 
-        // Mouse wheel zoom - zooms toward mouse position using transform-origin
+        // Mouse wheel zoom - smooth zoom toward mouse position
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
             
             const oldZoom = zoomLevel;
+            const zoomSpeed = 0.1;
             
             if (e.deltaY < 0 && zoomLevel < 5) {
-                zoomLevel = Math.min(5, zoomLevel + 0.15);
+                zoomLevel = Math.min(5, zoomLevel * (1 + zoomSpeed));
             } else if (e.deltaY > 0 && zoomLevel > 0.25) {
-                zoomLevel = Math.max(0.25, zoomLevel - 0.15);
+                zoomLevel = Math.max(0.25, zoomLevel / (1 + zoomSpeed));
             }
             
             if (oldZoom !== zoomLevel) {
-                // Get mouse position relative to the canvas wrapper
+                // Get the wrapper's current position
                 const wrapperRect = canvasWrapper.getBoundingClientRect();
+                const containerRect = canvasContainer.getBoundingClientRect();
+                
+                // Mouse position relative to the canvas wrapper (in zoomed space)
                 const mouseXInWrapper = e.clientX - wrapperRect.left;
                 const mouseYInWrapper = e.clientY - wrapperRect.top;
                 
-                // Convert to unscaled canvas coordinates
-                const canvasX = mouseXInWrapper / oldZoom;
-                const canvasY = mouseYInWrapper / oldZoom;
+                // Check if mouse is actually over the canvas
+                const isOverCanvas = mouseXInWrapper >= 0 && mouseXInWrapper <= wrapperRect.width &&
+                                     mouseYInWrapper >= 0 && mouseYInWrapper <= wrapperRect.height;
                 
-                // Set transform-origin to the mouse position on the canvas
-                // This makes the zoom happen around the mouse cursor
-                canvasWrapper.style.transformOrigin = `${canvasX}px ${canvasY}px`;
+                if (isOverCanvas) {
+                    // Convert to unscaled canvas coordinates
+                    const canvasX = mouseXInWrapper / oldZoom;
+                    const canvasY = mouseYInWrapper / oldZoom;
+                    
+                    // Clamp to canvas bounds
+                    const clampedX = Math.max(0, Math.min(canvasX, imageCanvas.width));
+                    const clampedY = Math.max(0, Math.min(canvasY, imageCanvas.height));
+                    
+                    // Set transform-origin to the clamped mouse position
+                    canvasWrapper.style.transformOrigin = `${clampedX}px ${clampedY}px`;
+                } else {
+                    // If mouse is outside canvas, zoom from center
+                    canvasWrapper.style.transformOrigin = `${imageCanvas.width / 2}px ${imageCanvas.height / 2}px`;
+                }
                 
                 updateZoom();
             }
