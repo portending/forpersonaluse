@@ -1594,50 +1594,37 @@
             canvasContainer.scrollTop = 0;
         });
 
-        // Mouse wheel zoom - smooth zoom toward mouse position using scroll adjustment
+        // Mouse wheel zoom - zooms toward mouse position using transform-origin
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
             
             const oldZoom = zoomLevel;
-            const zoomSpeed = 0.1;
+            const zoomingIn = e.deltaY < 0;
             
-            if (e.deltaY < 0 && zoomLevel < 5) {
-                zoomLevel = Math.min(5, zoomLevel * (1 + zoomSpeed));
-            } else if (e.deltaY > 0 && zoomLevel > 0.25) {
-                zoomLevel = Math.max(0.25, zoomLevel / (1 + zoomSpeed));
+            if (zoomingIn && zoomLevel < 5) {
+                zoomLevel = Math.min(5, zoomLevel + 0.15);
+            } else if (!zoomingIn && zoomLevel > 0.25) {
+                zoomLevel = Math.max(0.25, zoomLevel - 0.15);
             }
             
             if (oldZoom !== zoomLevel) {
-                const containerRect = canvasContainer.getBoundingClientRect();
+                if (zoomingIn) {
+                    // When zooming in, use mouse position as transform-origin
+                    const wrapperRect = canvasWrapper.getBoundingClientRect();
+                    const mouseXInWrapper = e.clientX - wrapperRect.left;
+                    const mouseYInWrapper = e.clientY - wrapperRect.top;
+                    
+                    // Convert to unscaled canvas coordinates
+                    const canvasX = mouseXInWrapper / oldZoom;
+                    const canvasY = mouseYInWrapper / oldZoom;
+                    
+                    canvasWrapper.style.transformOrigin = `${canvasX}px ${canvasY}px`;
+                } else {
+                    // When zooming out, use center to prevent image flying away
+                    canvasWrapper.style.transformOrigin = '50% 50%';
+                }
                 
-                // Mouse position relative to the container viewport
-                const mouseXInContainer = e.clientX - containerRect.left;
-                const mouseYInContainer = e.clientY - containerRect.top;
-                
-                // Content position under mouse before zoom (accounting for scroll)
-                const contentXBefore = (canvasContainer.scrollLeft + mouseXInContainer);
-                const contentYBefore = (canvasContainer.scrollTop + mouseYInContainer);
-                
-                // The ratio of where mouse is in the content
-                const ratioX = contentXBefore / oldZoom;
-                const ratioY = contentYBefore / oldZoom;
-                
-                // Update zoom (no transition for scroll adjustment to work properly)
-                canvasWrapper.style.transition = 'none';
                 updateZoom();
-                
-                // New content position that should be under mouse after zoom
-                const contentXAfter = ratioX * zoomLevel;
-                const contentYAfter = ratioY * zoomLevel;
-                
-                // Adjust scroll to keep the same content point under the mouse
-                canvasContainer.scrollLeft = contentXAfter - mouseXInContainer;
-                canvasContainer.scrollTop = contentYAfter - mouseYInContainer;
-                
-                // Re-enable transition after a frame
-                requestAnimationFrame(() => {
-                    canvasWrapper.style.transition = 'transform 0.1s ease-out';
-                });
             }
         }, { passive: false });
 
