@@ -1302,21 +1302,27 @@
             }
             
             if (oldZoom !== zoomLevel) {
-                const rect = canvasContainer.getBoundingClientRect();
+                // Get wrapper position before zoom
+                const wrapperRect = canvasWrapper.getBoundingClientRect();
                 
-                // Mouse position relative to container viewport
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
+                // Mouse position relative to wrapper (in scaled space)
+                const mouseXInWrapper = e.clientX - wrapperRect.left;
+                const mouseYInWrapper = e.clientY - wrapperRect.top;
                 
-                // Point on canvas (in unscaled coordinates) that mouse is over
-                const canvasX = (canvasContainer.scrollLeft + mouseX) / oldZoom;
-                const canvasY = (canvasContainer.scrollTop + mouseY) / oldZoom;
+                // Unscaled canvas position that mouse is over
+                const canvasX = mouseXInWrapper / oldZoom;
+                const canvasY = mouseYInWrapper / oldZoom;
                 
                 updateZoom();
                 
-                // After zoom, set scroll so the same canvas point is under mouse
-                canvasContainer.scrollLeft = canvasX * zoomLevel - mouseX;
-                canvasContainer.scrollTop = canvasY * zoomLevel - mouseY;
+                // After zoom, get new wrapper position and find where the point moved to
+                const newWrapperRect = canvasWrapper.getBoundingClientRect();
+                const newPointScreenX = newWrapperRect.left + canvasX * zoomLevel;
+                const newPointScreenY = newWrapperRect.top + canvasY * zoomLevel;
+                
+                // Scroll to move the point back under the mouse
+                canvasContainer.scrollLeft += newPointScreenX - e.clientX;
+                canvasContainer.scrollTop += newPointScreenY - e.clientY;
             }
         }, { passive: false });
 
