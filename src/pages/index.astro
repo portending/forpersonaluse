@@ -333,11 +333,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: auto;
+            overflow: scroll;
             min-height: 480px;
             max-height: 65vh;
             padding: 24px;
             background: #010409;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .canvas-container::-webkit-scrollbar {
+            display: none;
         }
 
         .canvas-wrapper {
@@ -359,6 +365,7 @@
             display: none;
             pointer-events: none;
             box-shadow: 0 0 0 9999px rgba(1, 4, 9, 0.75);
+            will-change: transform;
         }
 
         .crop-overlay.active {
@@ -954,10 +961,17 @@
         }
 
         function updateCropOverlay() {
-            cropOverlay.style.left = cropRect.x + 'px';
-            cropOverlay.style.top = cropRect.y + 'px';
-            cropOverlay.style.width = cropRect.width + 'px';
-            cropOverlay.style.height = cropRect.height + 'px';
+            // Use transform for sub-pixel precision, round dimensions to avoid partial pixels on borders
+            const x = cropRect.x;
+            const y = cropRect.y;
+            const w = Math.round(cropRect.width);
+            const h = Math.round(cropRect.height);
+            
+            cropOverlay.style.left = '0';
+            cropOverlay.style.top = '0';
+            cropOverlay.style.width = w + 'px';
+            cropOverlay.style.height = h + 'px';
+            cropOverlay.style.transform = `translate(${x}px, ${y}px)`;
             
             const realWidth = Math.round(cropRect.width / scale);
             const realHeight = Math.round(cropRect.height / scale);
@@ -1280,8 +1294,15 @@
             e.preventDefault();
             
             const rect = canvasContainer.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left + canvasContainer.scrollLeft;
-            const mouseY = e.clientY - rect.top + canvasContainer.scrollTop;
+            const wrapperRect = canvasWrapper.getBoundingClientRect();
+            
+            // Mouse position relative to the canvas wrapper
+            const mouseXInWrapper = e.clientX - wrapperRect.left;
+            const mouseYInWrapper = e.clientY - wrapperRect.top;
+            
+            // Mouse position relative to container viewport
+            const mouseXInContainer = e.clientX - rect.left;
+            const mouseYInContainer = e.clientY - rect.top;
             
             const oldZoom = zoomLevel;
             
@@ -1294,13 +1315,18 @@
             if (oldZoom !== zoomLevel) {
                 const zoomRatio = zoomLevel / oldZoom;
                 
+                // Calculate where the mouse point will be after zoom
+                const newMouseXInWrapper = mouseXInWrapper * zoomRatio;
+                const newMouseYInWrapper = mouseYInWrapper * zoomRatio;
+                
+                // Calculate scroll adjustment to keep mouse point stationary
+                const scrollAdjustX = newMouseXInWrapper - mouseXInWrapper;
+                const scrollAdjustY = newMouseYInWrapper - mouseYInWrapper;
+                
                 updateZoom();
                 
-                // Adjust scroll position to zoom toward mouse
-                requestAnimationFrame(() => {
-                    canvasContainer.scrollLeft = mouseX * zoomRatio - (e.clientX - rect.left);
-                    canvasContainer.scrollTop = mouseY * zoomRatio - (e.clientY - rect.top);
-                });
+                canvasContainer.scrollLeft += scrollAdjustX;
+                canvasContainer.scrollTop += scrollAdjustY;
             }
         }, { passive: false });
 
