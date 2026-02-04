@@ -349,7 +349,7 @@
         .canvas-wrapper {
             position: relative;
             display: inline-block;
-            transform-origin: center center;
+            transform-origin: 0 0;
         }
 
         #imageCanvas {
@@ -1293,17 +1293,6 @@
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
             
-            const rect = canvasContainer.getBoundingClientRect();
-            const wrapperRect = canvasWrapper.getBoundingClientRect();
-            
-            // Mouse position relative to the canvas wrapper
-            const mouseXInWrapper = e.clientX - wrapperRect.left;
-            const mouseYInWrapper = e.clientY - wrapperRect.top;
-            
-            // Mouse position relative to container viewport
-            const mouseXInContainer = e.clientX - rect.left;
-            const mouseYInContainer = e.clientY - rect.top;
-            
             const oldZoom = zoomLevel;
             
             if (e.deltaY < 0 && zoomLevel < 5) {
@@ -1313,20 +1302,21 @@
             }
             
             if (oldZoom !== zoomLevel) {
-                const zoomRatio = zoomLevel / oldZoom;
+                const rect = canvasContainer.getBoundingClientRect();
                 
-                // Calculate where the mouse point will be after zoom
-                const newMouseXInWrapper = mouseXInWrapper * zoomRatio;
-                const newMouseYInWrapper = mouseYInWrapper * zoomRatio;
+                // Mouse position relative to container viewport
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
                 
-                // Calculate scroll adjustment to keep mouse point stationary
-                const scrollAdjustX = newMouseXInWrapper - mouseXInWrapper;
-                const scrollAdjustY = newMouseYInWrapper - mouseYInWrapper;
+                // Point on canvas (in unscaled coordinates) that mouse is over
+                const canvasX = (canvasContainer.scrollLeft + mouseX) / oldZoom;
+                const canvasY = (canvasContainer.scrollTop + mouseY) / oldZoom;
                 
                 updateZoom();
                 
-                canvasContainer.scrollLeft += scrollAdjustX;
-                canvasContainer.scrollTop += scrollAdjustY;
+                // After zoom, set scroll so the same canvas point is under mouse
+                canvasContainer.scrollLeft = canvasX * zoomLevel - mouseX;
+                canvasContainer.scrollTop = canvasY * zoomLevel - mouseY;
             }
         }, { passive: false });
 
