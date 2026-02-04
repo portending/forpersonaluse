@@ -188,6 +188,28 @@
             visibility: hidden;
         }
 
+        .toggle-handles-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            background: transparent;
+            color: #00ff88;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-handles-btn:hover {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+
+        .crop-overlay.hide-handles .handle {
+            display: none;
+        }
+
         /* Crop info */
         .crop-info {
             position: absolute;
@@ -321,9 +343,9 @@
             </div>
 
             <div class="action-buttons">
-                <button class="action-btn crop-btn" onclick="cropImage()">✂️ Crop Image</button>
-                <button class="action-btn reset-btn" onclick="resetCrop()">🔄 Reset</button>
-                <button class="action-btn download-btn" onclick="downloadImage()" id="downloadBtn" style="display: none;">💾 Download</button>
+                <button class="action-btn crop-btn" id="cropBtn">✂️ Crop Image</button>
+                <button class="action-btn reset-btn" id="resetBtn">🔄 Reset</button>
+                <button class="action-btn download-btn" id="downloadBtn" style="display: none;">💾 Download</button>
             </div>
         </div>
 
@@ -336,15 +358,16 @@
             <div class="controller-title">Move Crop Area</div>
             <div class="controller-grid">
                 <button class="ctrl-btn empty"></button>
-                <button class="ctrl-btn" onclick="moveCrop(0, -5)">▲</button>
+                <button class="ctrl-btn" id="btnUp">▲</button>
                 <button class="ctrl-btn empty"></button>
-                <button class="ctrl-btn" onclick="moveCrop(-5, 0)">◀</button>
-                <button class="ctrl-btn" onclick="moveCrop(0, 0)" title="Center">●</button>
-                <button class="ctrl-btn" onclick="moveCrop(5, 0)">▶</button>
+                <button class="ctrl-btn" id="btnLeft">◀</button>
+                <button class="ctrl-btn" id="btnCenter" title="Center">●</button>
+                <button class="ctrl-btn" id="btnRight">▶</button>
                 <button class="ctrl-btn empty"></button>
-                <button class="ctrl-btn" onclick="moveCrop(0, 5)">▼</button>
+                <button class="ctrl-btn" id="btnDown">▼</button>
                 <button class="ctrl-btn empty"></button>
             </div>
+            <button class="toggle-handles-btn" id="toggleHandlesBtn">👁️ Hide Handles</button>
         </div>
     </div>
 
@@ -733,6 +756,31 @@
                     e.preventDefault();
                     moveCrop(step, 0);
                     break;
+            }
+        });
+
+        // Button event listeners (fix for onclick not finding functions)
+        document.getElementById('cropBtn').addEventListener('click', cropImage);
+        document.getElementById('resetBtn').addEventListener('click', resetCrop);
+        document.getElementById('downloadBtn').addEventListener('click', downloadImage);
+        
+        document.getElementById('btnUp').addEventListener('click', () => moveCrop(0, -5));
+        document.getElementById('btnDown').addEventListener('click', () => moveCrop(0, 5));
+        document.getElementById('btnLeft').addEventListener('click', () => moveCrop(-5, 0));
+        document.getElementById('btnRight').addEventListener('click', () => moveCrop(5, 0));
+        document.getElementById('btnCenter').addEventListener('click', () => moveCrop(0, 0));
+
+        // Toggle handles visibility
+        let handlesVisible = true;
+        const toggleHandlesBtn = document.getElementById('toggleHandlesBtn');
+        toggleHandlesBtn.addEventListener('click', () => {
+            handlesVisible = !handlesVisible;
+            if (handlesVisible) {
+                cropOverlay.classList.remove('hide-handles');
+                toggleHandlesBtn.textContent = '👁️ Hide Handles';
+            } else {
+                cropOverlay.classList.add('hide-handles');
+                toggleHandlesBtn.textContent = '👁️ Show Handles';
             }
         });
     </script>
