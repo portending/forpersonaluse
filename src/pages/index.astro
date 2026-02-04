@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CropMaster Pro</title>
+    <title>CropMaster</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,24 +15,25 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0f;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0d1117;
             min-height: 100vh;
-            color: #e4e4e7;
+            color: #c9d1d9;
+            font-size: 14px;
         }
 
         /* Header */
         .header {
-            background: linear-gradient(180deg, #111118 0%, #0a0a0f 100%);
-            border-bottom: 1px solid #27272a;
-            padding: 16px 32px;
+            background: #010409;
+            border-bottom: 1px solid #21262d;
+            padding: 12px 24px;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-content {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             align-items: center;
@@ -42,40 +43,83 @@
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .logo-img {
-            width: 42px;
-            height: 42px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
         }
 
         .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -0.5px;
-        }
-
-        .logo-text span {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 16px;
+            font-weight: 600;
+            color: #f0f6fc;
         }
 
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: inherit;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: #238636;
+            border-color: #238636;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            border-color: #363b42;
+            color: #c9d1d9;
+        }
+
+        .btn-secondary:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn-danger {
+            background: transparent;
+            border-color: #f85149;
+            color: #f85149;
+        }
+
+        .btn-danger:hover {
+            background: #f8514922;
+        }
+
+        #fileInput {
+            display: none;
         }
 
         /* Main Container */
         .container {
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 24px 32px;
+            padding: 24px;
         }
 
         /* Upload Section */
@@ -84,8 +128,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 80px 40px;
-            margin-bottom: 24px;
+            padding: 80px 24px;
         }
 
         .upload-section.hidden {
@@ -93,139 +136,96 @@
         }
 
         .upload-area {
-            background: linear-gradient(135deg, #18181b 0%, #1f1f23 100%);
-            border: 2px dashed #3f3f46;
-            border-radius: 24px;
-            padding: 60px 80px;
+            background: #0d1117;
+            border: 1px dashed #30363d;
+            border-radius: 6px;
+            padding: 48px 64px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            max-width: 600px;
+            transition: 0.2s ease;
+            max-width: 480px;
             width: 100%;
         }
 
         .upload-area:hover {
-            border-color: #8b5cf6;
-            background: linear-gradient(135deg, #1a1a1f 0%, #252530 100%);
-            transform: translateY(-2px);
+            border-color: #58a6ff;
+            background: #161b22;
         }
 
         .upload-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
+            font-size: 32px;
+            margin-bottom: 16px;
+            opacity: 0.6;
         }
 
         .upload-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #f0f6fc;
+            margin-bottom: 4px;
         }
 
         .upload-subtitle {
-            color: #71717a;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-        }
-
-        .upload-btn {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            border: none;
-            padding: 14px 32px;
-            font-size: 0.95rem;
-            border-radius: 12px;
-            cursor: pointer;
-            color: #fff;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .upload-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.3);
-        }
-
-        #fileInput {
-            display: none;
+            color: #8b949e;
+            font-size: 12px;
+            margin-bottom: 16px;
         }
 
         /* Main Layout */
         .main-layout {
             display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
+            grid-template-columns: 220px 1fr;
+            gap: 16px;
         }
 
         /* Sidebar */
         .sidebar {
-            background: #111113;
-            border-radius: 16px;
-            border: 1px solid #27272a;
-            padding: 20px;
             display: none;
-            height: fit-content;
-            position: sticky;
-            top: 90px;
         }
 
         .sidebar.active {
             display: block;
         }
 
-        .sidebar-section {
-            margin-bottom: 24px;
+        .sidebar-card {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 16px;
         }
 
-        .sidebar-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .sidebar-title {
-            font-size: 0.75rem;
+        .sidebar-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #21262d;
+            font-size: 12px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #71717a;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #f0f6fc;
         }
 
-        .preset-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .sidebar-content {
+            padding: 8px;
         }
 
         .preset-btn {
-            background: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 10px;
-            padding: 12px 14px;
-            color: #e4e4e7;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
-            font-family: inherit;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: inherit;
+            text-align: left;
+            transition: 0.1s ease;
         }
 
         .preset-btn:hover {
-            background: #27272a;
-            border-color: #8b5cf6;
+            background: #21262d;
         }
 
         .preset-btn .preset-name {
@@ -233,197 +233,132 @@
         }
 
         .preset-btn .preset-size {
-            color: #71717a;
-            font-size: 0.75rem;
-            font-weight: 400;
-        }
-
-        .custom-preset {
-            padding-top: 16px;
-            border-top: 1px solid #27272a;
+            color: #8b949e;
+            font-size: 11px;
+            font-family: ui-monospace, monospace;
         }
 
         .custom-inputs {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 12px;
+            padding: 8px 12px;
         }
 
         .custom-inputs input {
             flex: 1;
-            padding: 10px 12px;
-            border: 1px solid #27272a;
-            border-radius: 8px;
-            background: #18181b;
-            color: #e4e4e7;
-            font-size: 0.85rem;
+            padding: 6px 8px;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-size: 12px;
             font-family: inherit;
             width: 100%;
         }
 
         .custom-inputs input:focus {
             outline: none;
-            border-color: #8b5cf6;
-        }
-
-        .custom-inputs input::placeholder {
-            color: #52525b;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 2px #58a6ff33;
         }
 
         .custom-inputs span {
-            color: #52525b;
-            font-weight: 500;
+            color: #484f58;
+            font-size: 12px;
         }
 
-        .apply-custom-btn {
+        .sidebar-footer {
+            padding: 8px 12px 12px;
+        }
+
+        .sidebar-footer .btn {
             width: 100%;
-            padding: 10px 16px;
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            color: #e4e4e7;
-            font-weight: 500;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        .apply-custom-btn:hover {
-            background: #3f3f46;
-            border-color: #8b5cf6;
+            justify-content: center;
         }
 
         /* Workspace */
         .workspace {
             display: none;
-            background: #111113;
-            border-radius: 16px;
-            border: 1px solid #27272a;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
             overflow: hidden;
         }
 
         .workspace.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Toolbar */
         .toolbar {
-            background: #18181b;
-            border-bottom: 1px solid #27272a;
-            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 8px 12px;
+            background: #010409;
+            border-bottom: 1px solid #21262d;
+            gap: 8px;
         }
 
         .toolbar-group {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .toolbar-btn {
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: #e4e4e7;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: inherit;
-        }
-
-        .toolbar-btn:hover {
-            background: #3f3f46;
-            border-color: #52525b;
-        }
-
-        .toolbar-btn.primary {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            border: none;
-            color: #fff;
-        }
-
-        .toolbar-btn.primary:hover {
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
-        }
-
-        .toolbar-btn.danger {
-            border-color: #dc2626;
-            color: #f87171;
-        }
-
-        .toolbar-btn.danger:hover {
-            background: rgba(220, 38, 38, 0.2);
+            gap: 4px;
         }
 
         .toolbar-divider {
             width: 1px;
-            height: 24px;
-            background: #3f3f46;
+            height: 20px;
+            background: #30363d;
             margin: 0 8px;
         }
 
         .zoom-display {
-            background: #18181b;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            padding: 8px 14px;
-            color: #a1a1aa;
-            font-size: 0.85rem;
-            font-weight: 500;
-            min-width: 70px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #8b949e;
+            font-family: ui-monospace, monospace;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            min-width: 60px;
             text-align: center;
-        }
-
-        .zoom-display span {
-            color: #8b5cf6;
         }
 
         /* Canvas Area */
         .canvas-container {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: auto;
-            min-height: 500px;
-            max-height: 70vh;
-            padding: 40px;
-            background: 
-                radial-gradient(circle at center, #1a1a1f 0%, #0a0a0f 100%),
-                repeating-linear-gradient(0deg, transparent, transparent 20px, #18181b 20px, #18181b 21px),
-                repeating-linear-gradient(90deg, transparent, transparent 20px, #18181b 20px, #18181b 21px);
+            min-height: 480px;
+            max-height: 65vh;
+            padding: 24px;
+            background: #010409;
         }
 
         .canvas-wrapper {
             position: relative;
             display: inline-block;
             transform-origin: center center;
-            border-radius: 8px;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
         }
 
         #imageCanvas {
             display: block;
-            border-radius: 4px;
             cursor: crosshair;
         }
 
         /* Crop Overlay */
         .crop-overlay {
             position: absolute;
-            border: 2px solid #8b5cf6;
+            border: 1px solid #58a6ff;
             background: transparent;
             display: none;
             pointer-events: none;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 0 9999px rgba(1, 4, 9, 0.75);
         }
 
         .crop-overlay.active {
@@ -433,28 +368,25 @@
 
         .crop-cut-indicator {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             pointer-events: none;
         }
 
         .cut-line {
             position: absolute;
-            background: #8b5cf6;
+            background: #58a6ff;
         }
 
-        .cut-line.cut-top { top: 0; left: 0; right: 0; height: 2px; }
-        .cut-line.cut-bottom { bottom: 0; left: 0; right: 0; height: 2px; }
-        .cut-line.cut-left { top: 0; left: 0; bottom: 0; width: 2px; }
-        .cut-line.cut-right { top: 0; right: 0; bottom: 0; width: 2px; }
+        .cut-line.cut-top { top: 0; left: 0; right: 0; height: 1px; }
+        .cut-line.cut-bottom { bottom: 0; left: 0; right: 0; height: 1px; }
+        .cut-line.cut-left { top: 0; left: 0; bottom: 0; width: 1px; }
+        .cut-line.cut-right { top: 0; right: 0; bottom: 0; width: 1px; }
 
         .cut-corner {
             position: absolute;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #fff;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #f0f6fc;
         }
 
         .cut-corner.cut-tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
@@ -470,8 +402,8 @@
             left: 0;
             right: 0;
             height: 1px;
-            background: rgba(139, 92, 246, 0.4);
-            box-shadow: 0 calc(33.33% * 1) 0 rgba(139, 92, 246, 0.4);
+            background: rgba(88, 166, 255, 0.3);
+            box-shadow: 0 calc(33.33%) 0 rgba(88, 166, 255, 0.3);
             pointer-events: none;
         }
 
@@ -482,37 +414,33 @@
             top: 0;
             bottom: 0;
             width: 1px;
-            background: rgba(139, 92, 246, 0.4);
-            box-shadow: calc(33.33% * 1) 0 0 rgba(139, 92, 246, 0.4);
+            background: rgba(88, 166, 255, 0.3);
+            box-shadow: calc(33.33%) 0 0 rgba(88, 166, 255, 0.3);
             pointer-events: none;
         }
 
         /* Handles */
         .handle {
             position: absolute;
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border: 2px solid #8b5cf6;
-            border-radius: 2px;
+            width: 10px;
+            height: 10px;
+            background: #f0f6fc;
+            border: 1px solid #58a6ff;
             z-index: 10;
         }
 
-        .handle-n { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
-        .handle-s { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
-        .handle-e { right: -6px; top: 50%; transform: translateY(-50%); cursor: e-resize; }
-        .handle-w { left: -6px; top: 50%; transform: translateY(-50%); cursor: w-resize; }
-        .handle-nw { top: -6px; left: -6px; cursor: nw-resize; }
-        .handle-ne { top: -6px; right: -6px; cursor: ne-resize; }
-        .handle-sw { bottom: -6px; left: -6px; cursor: sw-resize; }
-        .handle-se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .handle-n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .handle-s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .handle-e { right: -5px; top: 50%; transform: translateY(-50%); cursor: e-resize; }
+        .handle-w { left: -5px; top: 50%; transform: translateY(-50%); cursor: w-resize; }
+        .handle-nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .handle-ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .handle-sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .handle-se { bottom: -5px; right: -5px; cursor: se-resize; }
 
         .crop-move {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             cursor: move;
         }
 
@@ -523,67 +451,62 @@
         /* Crop Info Badge */
         .crop-info {
             position: absolute;
-            top: -32px;
+            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background: #8b5cf6;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
+            margin-bottom: 8px;
+            background: #21262d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: ui-monospace, monospace;
             white-space: nowrap;
-            color: #fff;
+            color: #f0f6fc;
+            border: 1px solid #30363d;
         }
 
         /* Position Controller */
         .position-controller {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #18181b;
-            border-radius: 16px;
-            padding: 16px;
+            bottom: 16px;
+            right: 16px;
+            background: #161b22;
+            border-radius: 6px;
+            padding: 12px;
             display: none;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid #27272a;
+            border: 1px solid #30363d;
             z-index: 1000;
+            width: 160px;
         }
 
         .position-controller.active {
             display: block;
         }
 
-        .controller-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #27272a;
-        }
-
         .controller-title {
-            font-size: 0.8rem;
+            font-size: 11px;
             font-weight: 600;
-            color: #e4e4e7;
+            color: #f0f6fc;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .step-control {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .step-control label {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            color: #71717a;
-            margin-bottom: 6px;
+            font-size: 11px;
+            color: #8b949e;
+            margin-bottom: 4px;
         }
 
         .step-control label span {
-            color: #8b5cf6;
-            font-weight: 600;
+            color: #58a6ff;
+            font-family: ui-monospace, monospace;
         }
 
         .step-control input[type="range"] {
@@ -591,17 +514,17 @@
             height: 4px;
             -webkit-appearance: none;
             appearance: none;
-            background: #27272a;
+            background: #21262d;
             border-radius: 2px;
             outline: none;
         }
 
         .step-control input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: #8b5cf6;
-            border-radius: 50%;
+            width: 12px;
+            height: 12px;
+            background: #58a6ff;
+            border-radius: 2px;
             cursor: pointer;
         }
 
@@ -609,28 +532,26 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 4px;
-            width: 108px;
-            margin: 0 auto 12px;
+            margin-bottom: 10px;
         }
 
         .ctrl-btn {
-            width: 32px;
-            height: 32px;
+            aspect-ratio: 1;
             border: none;
-            border-radius: 6px;
-            background: #27272a;
-            color: #a1a1aa;
-            font-size: 0.9rem;
+            border-radius: 4px;
+            background: #21262d;
+            color: #8b949e;
+            font-size: 10px;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: 0.1s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .ctrl-btn:hover {
-            background: #8b5cf6;
-            color: #fff;
+            background: #30363d;
+            color: #f0f6fc;
         }
 
         .ctrl-btn.empty {
@@ -639,30 +560,29 @@
 
         .toggle-handles-btn {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #27272a;
-            border-radius: 6px;
+            padding: 6px;
+            border: 1px solid #30363d;
+            border-radius: 4px;
             background: transparent;
-            color: #a1a1aa;
-            font-size: 0.75rem;
+            color: #8b949e;
+            font-size: 11px;
             cursor: pointer;
-            transition: all 0.2s ease;
             font-family: inherit;
         }
 
         .toggle-handles-btn:hover {
-            background: #27272a;
-            color: #e4e4e7;
+            background: #21262d;
+            color: #c9d1d9;
         }
 
         /* Preview Section */
         .preview-section {
             display: none;
-            background: #111113;
-            border-radius: 16px;
-            border: 1px solid #27272a;
-            padding: 24px;
-            margin-top: 24px;
+            margin-top: 16px;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            overflow: hidden;
         }
 
         .preview-section.active {
@@ -670,34 +590,23 @@
         }
 
         .preview-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .preview-title {
-            font-size: 1rem;
+            padding: 12px 16px;
+            border-bottom: 1px solid #21262d;
+            font-size: 12px;
             font-weight: 600;
-            color: #e4e4e7;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #f0f6fc;
         }
 
         .preview-content {
             display: flex;
             justify-content: center;
             padding: 24px;
-            background: #18181b;
-            border-radius: 12px;
+            background: #010409;
         }
 
         #previewCanvas {
             max-width: 100%;
-            max-height: 400px;
-            border-radius: 4px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-height: 360px;
         }
 
         /* Scrollbar */
@@ -707,132 +616,123 @@
         }
 
         ::-webkit-scrollbar-track {
-            background: #18181b;
+            background: #0d1117;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #3f3f46;
+            background: #30363d;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #52525b;
+            background: #484f58;
         }
 
         /* Responsive */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .main-layout {
                 grid-template-columns: 1fr;
             }
 
             .sidebar {
-                position: relative;
-                top: 0;
+                order: 1;
             }
 
-            .header-content {
-                padding: 0 16px;
-            }
-
-            .container {
-                padding: 16px;
+            .workspace {
+                order: 0;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo-section">
                 <img src="https://i.imgur.com/a8eGMXu.png" alt="Logo" class="logo-img">
-                <div class="logo-text">Crop<span>Master</span></div>
+                <div class="logo-text">CropMaster</div>
             </div>
             <div class="header-actions">
                 <input type="file" id="fileInput" accept="image/*">
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    Upload New
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                    Upload image
                 </button>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <!-- Upload Section -->
         <div class="upload-section" id="uploadSection">
             <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                 <div class="upload-icon">📁</div>
                 <div class="upload-title">Drop your image here</div>
-                <div class="upload-subtitle">or click to browse from your computer</div>
-                <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
-                    Select Image
+                <div class="upload-subtitle">or click to browse</div>
+                <button class="btn btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+                    Choose file
                 </button>
             </div>
         </div>
 
-        <!-- Main Layout -->
         <div class="main-layout">
-            <!-- Sidebar -->
             <div class="sidebar" id="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-title">📐 Presets</div>
-                    <div class="preset-list">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">Presets</div>
+                    <div class="sidebar-content">
                         <button class="preset-btn" data-width="63" data-height="127">
                             <span class="preset-name">Pant Leg Preset 1</span>
-                            <span class="preset-size">63 × 127</span>
+                            <span class="preset-size">63×127</span>
                         </button>
                         <button class="preset-btn" data-width="100" data-height="100">
                             <span class="preset-name">Square</span>
-                            <span class="preset-size">100 × 100</span>
+                            <span class="preset-size">100×100</span>
                         </button>
                         <button class="preset-btn" data-width="1920" data-height="1080">
                             <span class="preset-name">1080p HD</span>
-                            <span class="preset-size">1920 × 1080</span>
+                            <span class="preset-size">1920×1080</span>
                         </button>
                         <button class="preset-btn" data-width="1280" data-height="720">
                             <span class="preset-name">720p HD</span>
-                            <span class="preset-size">1280 × 720</span>
+                            <span class="preset-size">1280×720</span>
                         </button>
                         <button class="preset-btn" data-width="500" data-height="500">
                             <span class="preset-name">Square Large</span>
-                            <span class="preset-size">500 × 500</span>
+                            <span class="preset-size">500×500</span>
                         </button>
                         <button class="preset-btn" data-width="800" data-height="600">
                             <span class="preset-name">4:3 Ratio</span>
-                            <span class="preset-size">800 × 600</span>
+                            <span class="preset-size">800×600</span>
                         </button>
                     </div>
                 </div>
                 
-                <div class="sidebar-section custom-preset">
-                    <div class="sidebar-title">✏️ Custom Size</div>
+                <div class="sidebar-card">
+                    <div class="sidebar-header">Custom size</div>
                     <div class="custom-inputs">
                         <input type="number" id="customWidth" placeholder="W" min="1">
                         <span>×</span>
                         <input type="number" id="customHeight" placeholder="H" min="1">
                     </div>
-                    <button class="apply-custom-btn" id="applyCustom">Apply Size</button>
+                    <div class="sidebar-footer">
+                        <button class="btn btn-secondary" id="applyCustom">Apply</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Workspace -->
             <div class="workspace" id="workspace">
-                <!-- Toolbar -->
                 <div class="toolbar">
                     <div class="toolbar-group">
-                        <button class="toolbar-btn" id="zoomOut">➖</button>
+                        <button class="btn btn-secondary" id="zoomOut">−</button>
                         <div class="zoom-display"><span id="zoomValue">100</span>%</div>
-                        <button class="toolbar-btn" id="zoomIn">➕</button>
-                        <button class="toolbar-btn" id="zoomReset">Reset</button>
+                        <button class="btn btn-secondary" id="zoomIn">+</button>
+                        <button class="btn btn-secondary" id="zoomReset">Reset</button>
                     </div>
                     <div class="toolbar-group">
-                        <button class="toolbar-btn danger" id="resetBtn">Reset Crop</button>
+                        <button class="btn btn-danger" id="resetBtn">Reset crop</button>
                         <div class="toolbar-divider"></div>
-                        <button class="toolbar-btn primary" id="cropBtn">✂️ Crop Image</button>
-                        <button class="toolbar-btn primary" id="downloadBtn" style="display: none;">💾 Download</button>
+                        <button class="btn btn-primary" id="cropBtn">Crop</button>
+                        <button class="btn btn-primary" id="downloadBtn" style="display: none;">Download</button>
                     </div>
                 </div>
-                <!-- Canvas Area -->
+
                 <div class="canvas-container" id="canvasContainer">
                     <div class="canvas-wrapper" id="canvasWrapper">
                         <canvas id="imageCanvas"></canvas>
@@ -863,21 +763,15 @@
             </div>
         </div>
 
-        <!-- Preview Section -->
         <div class="preview-section" id="previewSection">
-            <div class="preview-header">
-                <div class="preview-title">✨ Cropped Result</div>
-            </div>
+            <div class="preview-header">Result</div>
             <div class="preview-content">
                 <canvas id="previewCanvas"></canvas>
             </div>
         </div>
 
-        <!-- Position Controller -->
         <div class="position-controller" id="positionController">
-            <div class="controller-header">
-                <div class="controller-title">Move Crop</div>
-            </div>
+            <div class="controller-title">Move crop</div>
             <div class="step-control">
                 <label>Step <span id="stepValue">5</span>px</label>
                 <input type="range" id="stepSlider" min="0.5" max="50" value="5" step="0.5">
@@ -887,13 +781,13 @@
                 <button class="ctrl-btn" id="btnUp">▲</button>
                 <button class="ctrl-btn empty"></button>
                 <button class="ctrl-btn" id="btnLeft">◀</button>
-                <button class="ctrl-btn" id="btnCenter" title="Center">●</button>
+                <button class="ctrl-btn" id="btnCenter">●</button>
                 <button class="ctrl-btn" id="btnRight">▶</button>
                 <button class="ctrl-btn empty"></button>
                 <button class="ctrl-btn" id="btnDown">▼</button>
                 <button class="ctrl-btn empty"></button>
             </div>
-            <button class="toggle-handles-btn" id="toggleHandlesBtn">Hide Handles</button>
+            <button class="toggle-handles-btn" id="toggleHandlesBtn">Hide handles</button>
         </div>
     </div>
 
