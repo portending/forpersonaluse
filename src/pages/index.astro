@@ -343,8 +343,12 @@
         }
 
         .canvas-inner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 100%;
+            min-height: 100%;
             padding: 24px;
-            display: inline-block;
         }
 
         .canvas-wrapper {
@@ -1293,10 +1297,7 @@
             canvasContainer.scrollTop = 0;
         });
 
-        // Mouse wheel zoom - zooms toward mouse position
-        const canvasInner = document.getElementById('canvasInner');
-        const PADDING = 24; // matches CSS padding
-        
+        // Mouse wheel zoom - zooms toward mouse position using transform-origin
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
             
@@ -1309,30 +1310,20 @@
             }
             
             if (oldZoom !== zoomLevel) {
-                const containerRect = canvasContainer.getBoundingClientRect();
+                // Get mouse position relative to the canvas wrapper
+                const wrapperRect = canvasWrapper.getBoundingClientRect();
+                const mouseXInWrapper = e.clientX - wrapperRect.left;
+                const mouseYInWrapper = e.clientY - wrapperRect.top;
                 
-                // Mouse position in container viewport
-                const mouseX = e.clientX - containerRect.left;
-                const mouseY = e.clientY - containerRect.top;
+                // Convert to unscaled canvas coordinates
+                const canvasX = mouseXInWrapper / oldZoom;
+                const canvasY = mouseYInWrapper / oldZoom;
                 
-                // Position in content (scroll + viewport position)
-                const contentX = canvasContainer.scrollLeft + mouseX;
-                const contentY = canvasContainer.scrollTop + mouseY;
-                
-                // Convert to canvas pixel coordinates (accounting for padding)
-                // Canvas starts at PADDING offset in the content
-                const canvasPixelX = (contentX - PADDING) / oldZoom;
-                const canvasPixelY = (contentY - PADDING) / oldZoom;
+                // Set transform-origin to the mouse position on the canvas
+                // This makes the zoom happen around the mouse cursor
+                canvasWrapper.style.transformOrigin = `${canvasX}px ${canvasY}px`;
                 
                 updateZoom();
-                
-                // After zoom, that canvas pixel is now at this content position:
-                const newContentX = PADDING + canvasPixelX * zoomLevel;
-                const newContentY = PADDING + canvasPixelY * zoomLevel;
-                
-                // Scroll so that position is under the mouse
-                canvasContainer.scrollLeft = newContentX - mouseX;
-                canvasContainer.scrollTop = newContentY - mouseY;
             }
         }, { passive: false });
 
