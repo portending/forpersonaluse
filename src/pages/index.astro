@@ -343,12 +343,8 @@
         }
 
         .canvas-inner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-width: 100%;
-            min-height: 100%;
             padding: 24px;
+            display: inline-block;
         }
 
         .canvas-wrapper {
@@ -1299,6 +1295,7 @@
 
         // Mouse wheel zoom - zooms toward mouse position
         const canvasInner = document.getElementById('canvasInner');
+        const PADDING = 24; // matches CSS padding
         
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
@@ -1314,32 +1311,26 @@
             if (oldZoom !== zoomLevel) {
                 const containerRect = canvasContainer.getBoundingClientRect();
                 
-                // Mouse position relative to container viewport
+                // Mouse position in container viewport
                 const mouseX = e.clientX - containerRect.left;
                 const mouseY = e.clientY - containerRect.top;
                 
-                // Current scroll + mouse = position in scrollable content
+                // Position in content (scroll + viewport position)
                 const contentX = canvasContainer.scrollLeft + mouseX;
                 const contentY = canvasContainer.scrollTop + mouseY;
                 
-                // Get old inner size to find relative position
-                const oldInnerWidth = canvasInner.scrollWidth;
-                const oldInnerHeight = canvasInner.scrollHeight;
+                // Convert to canvas pixel coordinates (accounting for padding)
+                // Canvas starts at PADDING offset in the content
+                const canvasPixelX = (contentX - PADDING) / oldZoom;
+                const canvasPixelY = (contentY - PADDING) / oldZoom;
                 
                 updateZoom();
                 
-                // Get new inner size
-                const newInnerWidth = canvasInner.scrollWidth;
-                const newInnerHeight = canvasInner.scrollHeight;
+                // After zoom, that canvas pixel is now at this content position:
+                const newContentX = PADDING + canvasPixelX * zoomLevel;
+                const newContentY = PADDING + canvasPixelY * zoomLevel;
                 
-                // Scale the content position by the ratio of new/old sizes
-                const scaleRatioX = newInnerWidth / oldInnerWidth;
-                const scaleRatioY = newInnerHeight / oldInnerHeight;
-                
-                const newContentX = contentX * scaleRatioX;
-                const newContentY = contentY * scaleRatioY;
-                
-                // Set scroll so mouse stays over the same relative point
+                // Scroll so that position is under the mouse
                 canvasContainer.scrollLeft = newContentX - mouseX;
                 canvasContainer.scrollTop = newContentY - mouseY;
             }
