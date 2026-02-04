@@ -1,50 +1,740 @@
----
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
----
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Image Cropper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            color: #1a1a2e;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .workspace {
+            display: none;
+            position: relative;
+            background: #0d1117;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .workspace.active {
+            display: block;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: inline-block;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        #imageCanvas {
+            max-width: 100%;
+            border-radius: 10px;
+            cursor: crosshair;
+        }
+
+        .crop-overlay {
+            position: absolute;
+            border: 3px dashed #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            display: none;
+            pointer-events: none;
+        }
+
+        .crop-overlay.active {
+            display: block;
+            pointer-events: auto;
+        }
+
+        /* Resize handles */
+        .handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #00ff88;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .handle-n { top: -7px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .handle-s { bottom: -7px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .handle-e { right: -7px; top: 50%; transform: translateY(-50%); cursor: e-resize; }
+        .handle-w { left: -7px; top: 50%; transform: translateY(-50%); cursor: w-resize; }
+        .handle-nw { top: -7px; left: -7px; cursor: nw-resize; }
+        .handle-ne { top: -7px; right: -7px; cursor: ne-resize; }
+        .handle-sw { bottom: -7px; left: -7px; cursor: sw-resize; }
+        .handle-se { bottom: -7px; right: -7px; cursor: se-resize; }
+
+        .crop-move {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            cursor: move;
+        }
+
+        /* Position controller */
+        .position-controller {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(13, 17, 23, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .position-controller.active {
+            display: block;
+        }
+
+        .controller-title {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+
+        .controller-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            width: 120px;
+        }
+
+        .ctrl-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #00ff88;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctrl-btn:hover {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.95);
+        }
+
+        .ctrl-btn.empty {
+            visibility: hidden;
+        }
+
+        /* Crop info */
+        .crop-info {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .crop-btn {
+            background: linear-gradient(90deg, #00ff88, #00d9ff);
+            color: #1a1a2e;
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .download-btn {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Preview section */
+        .preview-section {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: #0d1117;
+            border-radius: 15px;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .preview-section h3 {
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        #previewCanvas {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 2px solid #00ff88;
+        }
+
+        /* Instructions */
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 217, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .instructions p {
+            margin: 5px 0;
+            color: #aaa;
+        }
+
+        .instructions strong {
+            color: #00d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Easy Image Cropper</h1>
+        
+        <div class="instructions">
+            <p><strong>Step 1:</strong> Upload an image</p>
+            <p><strong>Step 2:</strong> Click and drag to select crop area</p>
+            <p><strong>Step 3:</strong> Adjust using handles or the position controller</p>
+            <p><strong>Step 4:</strong> Click "Crop Image" to see the result!</p>
+        </div>
+
+        <div class="upload-section">
+            <input type="file" id="fileInput" accept="image/*">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                📁 Upload Image
+            </button>
+        </div>
+
+        <div class="workspace" id="workspace">
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="imageCanvas"></canvas>
+                <div class="crop-overlay" id="cropOverlay">
+                    <div class="crop-info" id="cropInfo">0 × 0</div>
+                    <div class="crop-move" id="cropMove"></div>
+                    <div class="handle handle-n" data-handle="n"></div>
+                    <div class="handle handle-s" data-handle="s"></div>
+                    <div class="handle handle-e" data-handle="e"></div>
+                    <div class="handle handle-w" data-handle="w"></div>
+                    <div class="handle handle-nw" data-handle="nw"></div>
+                    <div class="handle handle-ne" data-handle="ne"></div>
+                    <div class="handle handle-sw" data-handle="sw"></div>
+                    <div class="handle handle-se" data-handle="se"></div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn crop-btn" onclick="cropImage()">✂️ Crop Image</button>
+                <button class="action-btn reset-btn" onclick="resetCrop()">🔄 Reset</button>
+                <button class="action-btn download-btn" onclick="downloadImage()" id="downloadBtn" style="display: none;">💾 Download</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <h3>✨ Cropped Result</h3>
+            <canvas id="previewCanvas"></canvas>
+        </div>
+
+        <div class="position-controller" id="positionController">
+            <div class="controller-title">Move Crop Area</div>
+            <div class="controller-grid">
+                <button class="ctrl-btn empty"></button>
+                <button class="ctrl-btn" onclick="moveCrop(0, -5)">▲</button>
+                <button class="ctrl-btn empty"></button>
+                <button class="ctrl-btn" onclick="moveCrop(-5, 0)">◀</button>
+                <button class="ctrl-btn" onclick="moveCrop(0, 0)" title="Center">●</button>
+                <button class="ctrl-btn" onclick="moveCrop(5, 0)">▶</button>
+                <button class="ctrl-btn empty"></button>
+                <button class="ctrl-btn" onclick="moveCrop(0, 5)">▼</button>
+                <button class="ctrl-btn empty"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const imageCanvas = document.getElementById('imageCanvas');
+        const ctx = imageCanvas.getContext('2d');
+        const workspace = document.getElementById('workspace');
+        const cropOverlay = document.getElementById('cropOverlay');
+        const cropInfo = document.getElementById('cropInfo');
+        const positionController = document.getElementById('positionController');
+        const previewSection = document.getElementById('previewSection');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let originalImage = null;
+        let isDrawing = false;
+        let isResizing = false;
+        let isMoving = false;
+        let startX, startY;
+        let cropRect = { x: 0, y: 0, width: 0, height: 0 };
+        let currentHandle = null;
+        let canvasRect = null;
+        let scale = 1;
+
+        // File upload handler
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    originalImage = new Image();
+                    originalImage.onload = () => {
+                        setupCanvas();
+                        workspace.classList.add('active');
+                        previewSection.classList.remove('active');
+                        downloadBtn.style.display = 'none';
+                    };
+                    originalImage.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function setupCanvas() {
+            const maxWidth = Math.min(window.innerWidth - 80, 900);
+            const maxHeight = window.innerHeight * 0.6;
+            
+            scale = Math.min(maxWidth / originalImage.width, maxHeight / originalImage.height, 1);
+            
+            imageCanvas.width = originalImage.width * scale;
+            imageCanvas.height = originalImage.height * scale;
+            
+            ctx.drawImage(originalImage, 0, 0, imageCanvas.width, imageCanvas.height);
+            
+            resetCrop();
+        }
+
+        function resetCrop() {
+            cropRect = { x: 0, y: 0, width: 0, height: 0 };
+            cropOverlay.classList.remove('active');
+            positionController.classList.remove('active');
+            updateCropOverlay();
+        }
+
+        // Mouse events for drawing crop area
+        imageCanvas.addEventListener('mousedown', startDraw);
+        imageCanvas.addEventListener('mousemove', draw);
+        imageCanvas.addEventListener('mouseup', endDraw);
+        imageCanvas.addEventListener('mouseleave', endDraw);
+
+        // Touch events for mobile
+        imageCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            startDraw({ clientX: touch.clientX, clientY: touch.clientY });
+        });
+        imageCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            draw({ clientX: touch.clientX, clientY: touch.clientY });
+        });
+        imageCanvas.addEventListener('touchend', endDraw);
+
+        function startDraw(e) {
+            if (cropOverlay.classList.contains('active')) return;
+            
+            canvasRect = imageCanvas.getBoundingClientRect();
+            isDrawing = true;
+            startX = e.clientX - canvasRect.left;
+            startY = e.clientY - canvasRect.top;
+            
+            cropRect.x = startX;
+            cropRect.y = startY;
+            cropRect.width = 0;
+            cropRect.height = 0;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const currentX = e.clientX - canvasRect.left;
+            const currentY = e.clientY - canvasRect.top;
+            
+            cropRect.width = currentX - startX;
+            cropRect.height = currentY - startY;
+            
+            // Handle negative dimensions (dragging backwards)
+            if (cropRect.width < 0) {
+                cropRect.x = currentX;
+                cropRect.width = Math.abs(cropRect.width);
+            } else {
+                cropRect.x = startX;
+            }
+            
+            if (cropRect.height < 0) {
+                cropRect.y = currentY;
+                cropRect.height = Math.abs(cropRect.height);
+            } else {
+                cropRect.y = startY;
+            }
+            
+            updateCropOverlay();
+        }
+
+        function endDraw() {
+            if (isDrawing && cropRect.width > 10 && cropRect.height > 10) {
+                cropOverlay.classList.add('active');
+                positionController.classList.add('active');
+            }
+            isDrawing = false;
+        }
+
+        function updateCropOverlay() {
+            cropOverlay.style.left = cropRect.x + 'px';
+            cropOverlay.style.top = cropRect.y + 'px';
+            cropOverlay.style.width = cropRect.width + 'px';
+            cropOverlay.style.height = cropRect.height + 'px';
+            
+            const realWidth = Math.round(cropRect.width / scale);
+            const realHeight = Math.round(cropRect.height / scale);
+            cropInfo.textContent = `${realWidth} × ${realHeight}`;
+        }
+
+        // Handle resizing
+        document.querySelectorAll('.handle').forEach(handle => {
+            handle.addEventListener('mousedown', startResize);
+            handle.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                startResize({ target: handle, clientX: touch.clientX, clientY: touch.clientY });
+            });
+        });
+
+        function startResize(e) {
+            e.stopPropagation();
+            isResizing = true;
+            currentHandle = e.target.dataset.handle;
+            canvasRect = imageCanvas.getBoundingClientRect();
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+            document.addEventListener('touchmove', resizeTouch);
+            document.addEventListener('touchend', stopResize);
+        }
+
+        function resizeTouch(e) {
+            const touch = e.touches[0];
+            resize({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function resize(e) {
+            if (!isResizing) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            const minSize = 20;
+            
+            switch (currentHandle) {
+                case 'n':
+                    if (cropRect.height - dy > minSize) {
+                        cropRect.y += dy;
+                        cropRect.height -= dy;
+                    }
+                    break;
+                case 's':
+                    if (cropRect.height + dy > minSize) {
+                        cropRect.height += dy;
+                    }
+                    break;
+                case 'e':
+                    if (cropRect.width + dx > minSize) {
+                        cropRect.width += dx;
+                    }
+                    break;
+                case 'w':
+                    if (cropRect.width - dx > minSize) {
+                        cropRect.x += dx;
+                        cropRect.width -= dx;
+                    }
+                    break;
+                case 'nw':
+                    if (cropRect.width - dx > minSize) {
+                        cropRect.x += dx;
+                        cropRect.width -= dx;
+                    }
+                    if (cropRect.height - dy > minSize) {
+                        cropRect.y += dy;
+                        cropRect.height -= dy;
+                    }
+                    break;
+                case 'ne':
+                    if (cropRect.width + dx > minSize) {
+                        cropRect.width += dx;
+                    }
+                    if (cropRect.height - dy > minSize) {
+                        cropRect.y += dy;
+                        cropRect.height -= dy;
+                    }
+                    break;
+                case 'sw':
+                    if (cropRect.width - dx > minSize) {
+                        cropRect.x += dx;
+                        cropRect.width -= dx;
+                    }
+                    if (cropRect.height + dy > minSize) {
+                        cropRect.height += dy;
+                    }
+                    break;
+                case 'se':
+                    if (cropRect.width + dx > minSize) {
+                        cropRect.width += dx;
+                    }
+                    if (cropRect.height + dy > minSize) {
+                        cropRect.height += dy;
+                    }
+                    break;
+            }
+            
+            constrainCrop();
+            updateCropOverlay();
+            
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        function stopResize() {
+            isResizing = false;
+            currentHandle = null;
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+            document.removeEventListener('touchmove', resizeTouch);
+            document.removeEventListener('touchend', stopResize);
+        }
+
+        // Handle moving the crop area
+        const cropMove = document.getElementById('cropMove');
+        cropMove.addEventListener('mousedown', startMove);
+        cropMove.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            startMove({ clientX: touch.clientX, clientY: touch.clientY });
+        });
+
+        function startMove(e) {
+            isMoving = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            document.addEventListener('mousemove', move);
+            document.addEventListener('mouseup', stopMove);
+            document.addEventListener('touchmove', moveTouch);
+            document.addEventListener('touchend', stopMove);
+        }
+
+        function moveTouch(e) {
+            const touch = e.touches[0];
+            move({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+
+        function move(e) {
+            if (!isMoving) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            cropRect.x += dx;
+            cropRect.y += dy;
+            
+            constrainCrop();
+            updateCropOverlay();
+            
+            startX = e.clientX;
+            startY = e.clientY;
+        }
+
+        function stopMove() {
+            isMoving = false;
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', stopMove);
+            document.removeEventListener('touchmove', moveTouch);
+            document.removeEventListener('touchend', stopMove);
+        }
+
+        // Position controller movement
+        function moveCrop(dx, dy) {
+            if (!cropOverlay.classList.contains('active')) return;
+            
+            cropRect.x += dx;
+            cropRect.y += dy;
+            
+            constrainCrop();
+            updateCropOverlay();
+        }
+
+        // Constrain crop area within canvas bounds
+        function constrainCrop() {
+            cropRect.x = Math.max(0, Math.min(cropRect.x, imageCanvas.width - cropRect.width));
+            cropRect.y = Math.max(0, Math.min(cropRect.y, imageCanvas.height - cropRect.height));
+            cropRect.width = Math.min(cropRect.width, imageCanvas.width - cropRect.x);
+            cropRect.height = Math.min(cropRect.height, imageCanvas.height - cropRect.y);
+        }
+
+        // Crop the image
+        function cropImage() {
+            if (cropRect.width < 10 || cropRect.height < 10) {
+                alert('Please select a crop area first!');
+                return;
+            }
+            
+            // Calculate actual crop coordinates on original image
+            const actualX = cropRect.x / scale;
+            const actualY = cropRect.y / scale;
+            const actualWidth = cropRect.width / scale;
+            const actualHeight = cropRect.height / scale;
+            
+            previewCanvas.width = actualWidth;
+            previewCanvas.height = actualHeight;
+            
+            previewCtx.drawImage(
+                originalImage,
+                actualX, actualY, actualWidth, actualHeight,
+                0, 0, actualWidth, actualHeight
+            );
+            
+            previewSection.classList.add('active');
+            downloadBtn.style.display = 'inline-block';
+            
+            // Scroll to preview
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Download cropped image
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'cropped-image.png';
+            link.href = previewCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (!cropOverlay.classList.contains('active')) return;
+            
+            const step = e.shiftKey ? 20 : 5;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    moveCrop(0, -step);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    moveCrop(0, step);
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    moveCrop(-step, 0);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    moveCrop(step, 0);
+                    break;
+            }
+        });
+    </script>
+</body>
 </html>
