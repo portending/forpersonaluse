@@ -426,9 +426,8 @@
         .canvas-wrapper {
             position: relative;
             display: inline-block;
-            transform-origin: center center;
+            transform-origin: 0 0;
             flex-shrink: 0;
-            transition: transform 0.1s ease-out;
             /* Transparency grid pattern */
             background-image: 
                 linear-gradient(45deg, var(--transparency-dark) 25%, transparent 25%),
@@ -1595,7 +1594,7 @@
             canvasContainer.scrollTop = 0;
         });
 
-        // Mouse wheel zoom - smooth zoom toward mouse position
+        // Mouse wheel zoom - smooth zoom toward mouse position using scroll adjustment
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
             
@@ -1609,35 +1608,36 @@
             }
             
             if (oldZoom !== zoomLevel) {
-                // Get the wrapper's current position
-                const wrapperRect = canvasWrapper.getBoundingClientRect();
                 const containerRect = canvasContainer.getBoundingClientRect();
                 
-                // Mouse position relative to the canvas wrapper (in zoomed space)
-                const mouseXInWrapper = e.clientX - wrapperRect.left;
-                const mouseYInWrapper = e.clientY - wrapperRect.top;
+                // Mouse position relative to the container viewport
+                const mouseXInContainer = e.clientX - containerRect.left;
+                const mouseYInContainer = e.clientY - containerRect.top;
                 
-                // Check if mouse is actually over the canvas
-                const isOverCanvas = mouseXInWrapper >= 0 && mouseXInWrapper <= wrapperRect.width &&
-                                     mouseYInWrapper >= 0 && mouseYInWrapper <= wrapperRect.height;
+                // Content position under mouse before zoom (accounting for scroll)
+                const contentXBefore = (canvasContainer.scrollLeft + mouseXInContainer);
+                const contentYBefore = (canvasContainer.scrollTop + mouseYInContainer);
                 
-                if (isOverCanvas) {
-                    // Convert to unscaled canvas coordinates
-                    const canvasX = mouseXInWrapper / oldZoom;
-                    const canvasY = mouseYInWrapper / oldZoom;
-                    
-                    // Clamp to canvas bounds
-                    const clampedX = Math.max(0, Math.min(canvasX, imageCanvas.width));
-                    const clampedY = Math.max(0, Math.min(canvasY, imageCanvas.height));
-                    
-                    // Set transform-origin to the clamped mouse position
-                    canvasWrapper.style.transformOrigin = `${clampedX}px ${clampedY}px`;
-                } else {
-                    // If mouse is outside canvas, zoom from center
-                    canvasWrapper.style.transformOrigin = `${imageCanvas.width / 2}px ${imageCanvas.height / 2}px`;
-                }
+                // The ratio of where mouse is in the content
+                const ratioX = contentXBefore / oldZoom;
+                const ratioY = contentYBefore / oldZoom;
                 
+                // Update zoom (no transition for scroll adjustment to work properly)
+                canvasWrapper.style.transition = 'none';
                 updateZoom();
+                
+                // New content position that should be under mouse after zoom
+                const contentXAfter = ratioX * zoomLevel;
+                const contentYAfter = ratioY * zoomLevel;
+                
+                // Adjust scroll to keep the same content point under the mouse
+                canvasContainer.scrollLeft = contentXAfter - mouseXInContainer;
+                canvasContainer.scrollTop = contentYAfter - mouseYInContainer;
+                
+                // Re-enable transition after a frame
+                requestAnimationFrame(() => {
+                    canvasWrapper.style.transition = 'transform 0.1s ease-out';
+                });
             }
         }, { passive: false });
 
