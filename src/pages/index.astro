@@ -1175,8 +1175,13 @@
             
             canvasRect = imageCanvas.getBoundingClientRect();
             isDrawing = true;
-            startX = e.clientX - canvasRect.left;
-            startY = e.clientY - canvasRect.top;
+            // Account for zoom level when calculating coordinates
+            startX = (e.clientX - canvasRect.left) / zoomLevel;
+            startY = (e.clientY - canvasRect.top) / zoomLevel;
+            
+            // Constrain to canvas bounds
+            startX = Math.max(0, Math.min(startX, imageCanvas.width));
+            startY = Math.max(0, Math.min(startY, imageCanvas.height));
             
             cropRect.x = startX;
             cropRect.y = startY;
@@ -1187,8 +1192,13 @@
         function draw(e) {
             if (!isDrawing) return;
             
-            const currentX = e.clientX - canvasRect.left;
-            const currentY = e.clientY - canvasRect.top;
+            // Account for zoom level when calculating coordinates
+            let currentX = (e.clientX - canvasRect.left) / zoomLevel;
+            let currentY = (e.clientY - canvasRect.top) / zoomLevel;
+            
+            // Constrain to canvas bounds
+            currentX = Math.max(0, Math.min(currentX, imageCanvas.width));
+            currentY = Math.max(0, Math.min(currentY, imageCanvas.height));
             
             cropRect.width = currentX - startX;
             cropRect.height = currentY - startY;
