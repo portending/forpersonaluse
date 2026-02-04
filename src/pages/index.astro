@@ -330,13 +330,9 @@
         /* Canvas Area */
         .canvas-container {
             flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             overflow: scroll;
             min-height: 480px;
             max-height: 65vh;
-            padding: 24px;
             background: #010409;
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -346,10 +342,20 @@
             display: none;
         }
 
+        .canvas-inner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 100%;
+            min-height: 100%;
+            padding: 24px;
+        }
+
         .canvas-wrapper {
             position: relative;
             display: inline-block;
             transform-origin: 0 0;
+            flex-shrink: 0;
         }
 
         #imageCanvas {
@@ -741,6 +747,7 @@
                 </div>
 
                 <div class="canvas-container" id="canvasContainer">
+                    <div class="canvas-inner" id="canvasInner">
                     <div class="canvas-wrapper" id="canvasWrapper">
                         <canvas id="imageCanvas"></canvas>
                         <div class="crop-overlay" id="cropOverlay">
@@ -765,6 +772,7 @@
                             <div class="handle handle-sw" data-handle="sw"></div>
                             <div class="handle handle-se" data-handle="se"></div>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -1290,6 +1298,8 @@
         });
 
         // Mouse wheel zoom - zooms toward mouse position
+        const canvasInner = document.getElementById('canvasInner');
+        
         canvasContainer.addEventListener('wheel', (e) => {
             e.preventDefault();
             
@@ -1302,27 +1312,36 @@
             }
             
             if (oldZoom !== zoomLevel) {
-                // Get wrapper position before zoom
-                const wrapperRect = canvasWrapper.getBoundingClientRect();
+                const containerRect = canvasContainer.getBoundingClientRect();
                 
-                // Mouse position relative to wrapper (in scaled space)
-                const mouseXInWrapper = e.clientX - wrapperRect.left;
-                const mouseYInWrapper = e.clientY - wrapperRect.top;
+                // Mouse position relative to container viewport
+                const mouseX = e.clientX - containerRect.left;
+                const mouseY = e.clientY - containerRect.top;
                 
-                // Unscaled canvas position that mouse is over
-                const canvasX = mouseXInWrapper / oldZoom;
-                const canvasY = mouseYInWrapper / oldZoom;
+                // Current scroll + mouse = position in scrollable content
+                const contentX = canvasContainer.scrollLeft + mouseX;
+                const contentY = canvasContainer.scrollTop + mouseY;
+                
+                // Get old inner size to find relative position
+                const oldInnerWidth = canvasInner.scrollWidth;
+                const oldInnerHeight = canvasInner.scrollHeight;
                 
                 updateZoom();
                 
-                // After zoom, get new wrapper position and find where the point moved to
-                const newWrapperRect = canvasWrapper.getBoundingClientRect();
-                const newPointScreenX = newWrapperRect.left + canvasX * zoomLevel;
-                const newPointScreenY = newWrapperRect.top + canvasY * zoomLevel;
+                // Get new inner size
+                const newInnerWidth = canvasInner.scrollWidth;
+                const newInnerHeight = canvasInner.scrollHeight;
                 
-                // Scroll to move the point back under the mouse
-                canvasContainer.scrollLeft += newPointScreenX - e.clientX;
-                canvasContainer.scrollTop += newPointScreenY - e.clientY;
+                // Scale the content position by the ratio of new/old sizes
+                const scaleRatioX = newInnerWidth / oldInnerWidth;
+                const scaleRatioY = newInnerHeight / oldInnerHeight;
+                
+                const newContentX = contentX * scaleRatioX;
+                const newContentY = contentY * scaleRatioY;
+                
+                // Set scroll so mouse stays over the same relative point
+                canvasContainer.scrollLeft = newContentX - mouseX;
+                canvasContainer.scrollTop = newContentY - mouseY;
             }
         }, { passive: false });
 
